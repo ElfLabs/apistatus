@@ -86,6 +86,15 @@ func RegisterErrno(m map[Errno]string) {
 	}
 }
 
+// GetAllErrno 获取所有的错误代码
+func GetAllErrno() map[Errno]string {
+	m := make(map[Errno]string, len(errnoMap))
+	for k, v := range errnoMap {
+		m[k] = v
+	}
+	return m
+}
+
 // RegisteredErrno 错误代码是否已经注册
 func RegisteredErrno(errno Errno) bool {
 	_, ok := errnoMap[errno]
@@ -100,6 +109,15 @@ func RegisterHTTPStatusCode(m map[Errno]int) {
 		}
 		errnoStatusCode[errno] = statusCode
 	}
+}
+
+// GetAllHTTPStatusCode 获取所有的错误代码-HTTP状态码映射
+func GetAllHTTPStatusCode() map[Errno]int {
+	m := make(map[Errno]int, len(errnoStatusCode))
+	for k, v := range errnoStatusCode {
+		m[k] = v
+	}
+	return m
 }
 
 // RegisteredHTTPStatusCode 已经注册的HTTP状态码

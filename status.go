@@ -16,6 +16,7 @@ type IStatus interface {
 // Status 状态
 type Status struct {
 	// Errno 错误代码
+	// 0表示成功代码，其他均为错误代码。
 	Errno Errno `json:"errno"`
 	// Message 消息
 	Message string `json:"message"`
@@ -155,22 +156,42 @@ func (s *Status) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// NewErrnoStatus 新建错误代码状态
-func NewErrnoStatus(errno Errno) *Status {
-	status := &Status{}
-	return status.SetErrno(errno)
+// NewError 新建错误
+func NewError(errno Errno, message string, err error) *Status {
+	return &Status{
+		Errno:   errno,
+		Message: message,
+		Err:     err,
+	}
 }
 
-// NewErrorStatus 新建错误状态
+// NewErrnoStatus 新建错误代码状态
+func NewErrnoStatus(errno Errno) *Status {
+	return &Status{
+		Errno:   errno,
+		Message: errno.GetMessage(),
+	}
+}
+
+// NewErrorStatus 新建错误状态，使用errno的错误代码。
 func NewErrorStatus(errno Errno, err error) *Status {
 	if status, ok := err.(*Status); ok {
 		return status.SetErrno(errno)
 	}
 	status := &Status{}
-	return status.SetErrno(errno).SetError(err)
+	return status.SetError(err).SetErrno(errno)
 }
 
-// NewMessageStatus 新建消息状态
+// NewStatusCodeErrorStatus 新建HTTP状态码的错误状态，使用errno的错误代码。
+func NewStatusCodeErrorStatus(statusCode int, err error) *Status {
+	if status, ok := err.(*Status); ok {
+		return status.SetErrno(Errno(statusCode))
+	}
+	status := &Status{}
+	return status.SetError(err).SetErrno(Errno(statusCode))
+}
+
+// NewMessageStatus 新建消息状态，使用message的消息。
 func NewMessageStatus(errno Errno, message string) *Status {
 	return &Status{
 		Errno:   errno,
@@ -180,12 +201,44 @@ func NewMessageStatus(errno Errno, message string) *Status {
 
 // NewSuccessStatus 新建成功状态
 func NewSuccessStatus() *Status {
-	status := Status{}
-	return status.SetErrno(Success)
+	return &Status{
+		Errno:   Success,
+		Message: Success.GetMessage(),
+	}
 }
 
-// NewDataStatus 新建数据状态
-func NewDataStatus(data any) *Status {
-	status := Status{}
-	return status.SetError(Success).SetData(data)
+// NewSuccessDataStatus 新建数据状态
+func NewSuccessDataStatus(data any) *Status {
+	return &Status{
+		Errno:   Success,
+		Message: Success.GetMessage(),
+		Data:    data,
+	}
+}
+
+// NewErrnoDataStatus 新建数据状态
+func NewErrnoDataStatus(errno Errno, data any) *Status {
+	return &Status{
+		Errno:   errno,
+		Message: errno.GetMessage(),
+		Data:    data,
+	}
+}
+
+// NewMessageDataStatus 新建数据状态
+func NewMessageDataStatus(message string, data any) *Status {
+	return &Status{
+		Errno:   Success,
+		Message: message,
+		Data:    data,
+	}
+}
+
+// NewStatusCodeMessageDataStatus 新建HTTP状态码的数据状态
+func NewStatusCodeMessageDataStatus(statusCode int, message string, data any) *Status {
+	return &Status{
+		Errno:   Errno(statusCode),
+		Message: message,
+		Data:    data,
+	}
 }
