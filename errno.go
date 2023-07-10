@@ -130,11 +130,15 @@ const (
 	Success             Errno = iota // 成功
 	Failure                          // 失败
 	Error                            // 错误
+	Exception                        // 异常
 	ErrUnauthorized                  // 认证失败
+	ErrForbidden                     // 禁止
 	ErrInvalidParameter              // 参数错误
 	ErrValidate                      // 验证错误
 	ErrSerialization                 // 序列化错误
 	ErrDeserialization               // 反序列化错误
+	ErrNotFound                      // 未找到
+	ErrAlreadyExists                 // 已存在
 	MaxErrno
 )
 
@@ -148,11 +152,15 @@ var errnoMap = map[Errno]string{
 	Success:             "Success",
 	Failure:             "Failure",
 	Error:               "Error",
+	Exception:           "Exception",
 	ErrUnauthorized:     "Unauthorized",
+	ErrForbidden:        "Forbidden",
 	ErrInvalidParameter: "Invalid Parameter",
 	ErrValidate:         "Validate Error",
 	ErrSerialization:    "Serialization Error",
 	ErrDeserialization:  "Deserialization Error",
+	ErrNotFound:         "Not Found",
+	ErrAlreadyExists:    "Already Exists",
 }
 
 // errnoStatusCode 错误代码-HTTP状态码映射表
@@ -160,7 +168,11 @@ var errnoStatusCode = map[Errno]int{
 	Success:             http.StatusOK,
 	Failure:             http.StatusInternalServerError,
 	Error:               http.StatusInternalServerError,
+	Exception:           http.StatusInternalServerError,
 	ErrUnauthorized:     http.StatusUnauthorized,
+	ErrForbidden:        http.StatusForbidden,
 	ErrInvalidParameter: http.StatusBadRequest,
 	ErrValidate:         http.StatusBadRequest,
+	ErrNotFound:         http.StatusNotFound,
+	ErrAlreadyExists:    http.StatusConflict,
 }

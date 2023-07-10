@@ -133,14 +133,12 @@ func (s *Status) MarshalJSON() ([]byte, error) {
 
 	buf.WriteString(`{"errno":`)
 	buf.WriteString(strconv.Itoa(int(s.Errno)))
-	buf.WriteString(`,"message":"`)
-	buf.WriteString(s.Message)
-	buf.WriteString(`"`)
+	buf.WriteString(`,"message":`)
+	buf.WriteString(strconv.Quote(s.Message))
 
 	if s.Err != nil {
-		buf.WriteString(`,"error":"`)
-		buf.WriteString(s.Err.Error())
-		buf.WriteString(`"`)
+		buf.WriteString(`,"error":`)
+		buf.WriteString(strconv.Quote(s.Err.Error()))
 	}
 
 	if s.Data != nil {
