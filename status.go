@@ -3,6 +3,7 @@ package apistatus
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"strconv"
 )
 
@@ -38,6 +39,19 @@ func (s *Status) GetError() error {
 	return s.Err
 }
 
+func (s *Status) Format(state fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		if state.Flag('#') {
+			io.WriteString(state, s.String())
+			return
+		}
+		fallthrough
+	case 's', 'q':
+		io.WriteString(state, s.Error())
+	}
+}
+
 // String 实现Stringer接口
 func (s *Status) String() string {
 	data, err := s.MarshalJSON()
@@ -49,10 +63,16 @@ func (s *Status) String() string {
 
 // Error 实现error接口
 func (s *Status) Error() string {
-	if s.Err != nil {
+	switch {
+	case s.Message != "" && s.Err != nil:
+		return s.Message + ": " + s.Err.Error()
+	case s.Err != nil:
 		return s.Err.Error()
+	case s.Message != "":
+		return s.Message
+	default:
+		return "nil"
 	}
-	return s.String()
 }
 
 func (s *Status) Unwrap() error {
@@ -239,4 +259,24 @@ func NewStatusCodeMessageDataStatus(statusCode int, message string, data any) *S
 		Message: message,
 		Data:    data,
 	}
+}
+
+func WrapErrorMessage(err error, message string) *Status {
+	if err == nil {
+		return nil
+	}
+	status := &Status{
+		Errno: Error,
+	}
+	return status.SetError(err).SetMessage(message)
+}
+
+func WrapErrorMessagef(err error, format string, args ...interface{}) *Status {
+	if err == nil {
+		return nil
+	}
+	status := &Status{
+		Errno: Error,
+	}
+	return status.SetError(err).SetMessage(fmt.Sprintf(format, args...))
 }

@@ -1,5 +1,9 @@
 package apistatus
 
+import (
+	"fmt"
+)
+
 // Option 选项
 type Option func(s *Status)
 
@@ -32,6 +36,12 @@ func WithErrnoJust(errno Errno) Option {
 func WithMessage(message string) Option {
 	return func(s *Status) {
 		s.Message = message
+	}
+}
+
+func WithMessagef(format string, args ...interface{}) Option {
+	return func(s *Status) {
+		s.Message = fmt.Sprintf(format, args...)
 	}
 }
 
